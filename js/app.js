@@ -1,38 +1,4 @@
 $(document).ready(function(){
-	
-	/*--- Variable Declarations ---*/
-	var randomNumber;
-	var guessFlag;
-	var guessCount;
-	var userChoice;
-	var found = false;
-
-	/*--- Creating a new Game ---*/
-	newGame();
-
-	/*--- On Submit ---*/
-	$("form").submit(function(event){
-		
-		event.preventDefault();
-    	
-    	if (!found) {
-				userChoice = $('#userGuess').val();
-				console.log("User Choice = "+ userChoice);
-				clearText();
-				setFocus();
-				guessFlag = checkChoice(userChoice);
-			if (!guessFlag) {
-				guessCount++;
-				setCount(guessCount);
-				$("ul#guessList").append("<li>" + userChoice + "</li>");
-				guessFlag = checkTemparature(Math.abs(randomNumber - userChoice));
-			};
-		} //closing if !found
-		else {
-			setFeedback("You Won this game already! You need to start a new game.");
-			//disableGuess();
-		}; 
-	}); //end form submit
 
 	/*--- Display information modal box ---*/
   	$(".what").click(function(){
@@ -44,18 +10,28 @@ $(document).ready(function(){
   	$("a.close").click(function(){
   		$(".overlay").fadeOut(1000);
   	});
+	
+	/*--- Variable Declarations ---*/
+	var randomNumber;
+	var previousGuesses;
+	var guessCount;
+	var userInput;
+	var correctGuess = false;
 
-  	/*--- Creat new game on click ---*/
+	/*--- Declaring newGame as a function---*/
+	newGame(); //if you delete this, user input number guesses will result in "NaN"
+
+	/*--- Creat new game on click ---*/
   	$(".new").click(function(event){
   		event.preventDefault();
-  		newGame();
+  		newGame(); //need this here or new game button will not work
   	});
 
-	/*--- Create a New Game! ---*/
+	/*--- Creating a new game function ---*/
 	function newGame() {
-		guessFlag = true;
+		previousGuesses = true;
 		guessCount = 0;
-		found = false;
+		correctGuess = false;
 		$("ul#guessList li").remove();
 		setFeedback("Make your Guess!");
 		setCount(guessCount);
@@ -88,22 +64,39 @@ $(document).ready(function(){
 		$('#count').text(guessCount);
 	}
 
-	/*--- Prompt for User's Guess ---*/
-	function getChoice() {
-		var userChoice = prompt("Guess the Number","Your Guess");
-		console.log("User Choice = "+ userChoice);
-		return userChoice;
-	}
+	/*--- On Submit ---*/
+	$("form").submit(function(event){
+		
+		event.preventDefault();
+    	
+    	if (!correctGuess) {
+				userInput = $('#userGuess').val();
+				console.log("User Choice = "+ userInput);
+				clearText();
+				setFocus();
+				previousGuesses = checkChoice(userInput);
+			if (!previousGuesses) {
+				guessCount++;
+				setCount(guessCount);
+				$("ul#guessList").append("<li>" + userInput + "</li>");
+				previousGuesses	= checkTemperature(Math.abs(randomNumber - userInput));
+			};
+		} //closing if !correctGuess
+		else {
+			setFeedback("You Won this game already! You need to start a new game.");
+			//disableGuess();
+		}; 
+	}); //end form submit	
 
 	/*--- Check if the User's Guess meets the rules---*/
-	function checkChoice(userChoice) {
-		if (isNaN(userChoice)) {
+	function checkChoice(userInput) {
+		if (isNaN(userInput)) {
 			setFeedback("No luck! I accept only numbers.");
 			return true;
-		} else if (userChoice < 1 || userChoice > 100) {
+		} else if (userInput < 1 || userInput > 100) {
 			setFeedback("Oops! Your guess has to be a number between 1 and 100!");
 			return true;
-		}else if ($.trim(userChoice) == '') {
+		}else if ($.trim(userInput) == '') {
 			setFeedback("Please enter your guess!");
 			return true;
 		} else {
@@ -111,26 +104,26 @@ $(document).ready(function(){
 		};
 	}
 
-	/*--- Check the temparature for feedback ---*/
-	function checkTemparature(guessDifference) {
+	/*--- Check the temperature for feedback ---*/
+	function checkTemperature(tempRange) {
 
-		if (guessDifference == 0) {
+		if (tempRange == 0) {
 			setFeedback("Yay! You guessed it!!");
-			found = true;
+			correctGuess = true;
 			return false;
-		} else if (guessDifference <= 5) {
+		} else if (tempRange <= 5) {
 			setFeedback("Your Guess is getting too hot!");
 			return true;
-		} else if (guessDifference <= 10){
+		} else if (tempRange <= 10){
 			setFeedback("Your Guess is getting hot!");
 			return true;
-		} else if (guessDifference>=10 && guessDifference <= 20) {
+		} else if (tempRange>=10 && tempRange <= 20) {
 			setFeedback("Your Guess is getting Warm!");
 			return true;
-		} else if (guessDifference>=20 && guessDifference <= 30) {
+		} else if (tempRange>=20 && tempRange <= 30) {
 			setFeedback("Your Guess is getting cold!");
 			return true;
-		} else if (guessDifference>=30 && guessDifference <= 40) {
+		} else if (tempRange>=30 && tempRange <= 40) {
 			setFeedback("Your Guess is getting very cold!");
 			return true;
 		} else {
@@ -144,4 +137,4 @@ $(document).ready(function(){
 	function setFeedback(feedback) {
 		$('#feedback').text(feedback);
 	}
-});
+}); //end of hot/cold app code
